@@ -1,3 +1,4 @@
+const passport = require('passport');
 const Account = require('../models/account');
 
 exports.signup = function (signupFormData, callback) {
@@ -32,18 +33,31 @@ exports.signup = function (signupFormData, callback) {
 
 }
 
-exports.login = function (loginFormData, callback) {
+exports.login = function (req, callback) {
 
   //exec query 
-  console.log(loginFormData);
+  console.log(req.body);
 
-  // 1. check whether the email is valid 
-  // 2. if true, validate password 
+  // auth flow using passport local
+  passport.authenticate('local', function(err, account, info){
+    // 
+    if(err){
+      callback(err);
+    }
 
-  // if(!err){
-  //   console.log('Signup Successful!');
-  // }
-  // callback(err, result);
+    // if account is found -- upon successful authentication
+    if(account){
+      const resp = {
+        email: account.email,
+        token: account.generateJWT() // Gen JWT Token
+      }
 
+      callback(err, resp);
+    }else{
+      // if the email is not found, send error
+      callback(err, info);
+    }
+
+  })(req, callback);
 }
 

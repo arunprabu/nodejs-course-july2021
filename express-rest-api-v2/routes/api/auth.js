@@ -21,8 +21,7 @@ router.post('/signup', function (req, res, next) {
 router.post('/login', function (req, res, next) {
   console.log(req.body); // form data
 
-  // TODO: // We are sending req.body -- check it later
-  authService.login(req.body, (err, data) => {
+  authService.login(req, (err, data) => {
     if(!err){
       res.status(201).json(data);
     }else{
