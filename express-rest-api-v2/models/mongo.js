@@ -1,5 +1,6 @@
 var process = require("process");
 var mongoose = require("mongoose");
+const autoIncrement = require('mongoose-auto-increment');
 var mongoConfig = require("../config/mongoConfig.json");
 
 var dbURI = mongoConfig.url;
@@ -30,4 +31,5 @@ process.on('SIGINT', function() {
   }); 
 }); 
 
+autoIncrement.initialize(mongoose.connection);
 module.exports = mongoose;

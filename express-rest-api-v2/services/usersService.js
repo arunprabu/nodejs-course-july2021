@@ -1,53 +1,48 @@
-// exec db query
-// send the data from here 
+// establish handshake with DB (from services)
+const User = require('../models/user');
 
 // createUser 
-exports.createUser = function (userData, callback) {
+exports.createUser = function (userDataToBeSaved, callback) {
   console.log('Inside createUser');
-  console.log(userData);
-
-  // mocking the db call with 2 sec timeout
-  setTimeout(() => {
-    callback(null, {
-      id: 999,
-      name: 'John',
-      email: 'j@k.com',
-      phone: '4234231132'
-    });
-  }, 1000);
+  console.log(userDataToBeSaved);
+  
+  userDataToBeSaved.status = 'ACTIVE';
   // exec db query
-  // get the result from db
-  // send the result back to routes
+  const userDao = new User(userDataToBeSaved);
+  userDao.save((err, savedUser) => { // get the result 
+
+    // send it back to routes
+    if(!err){
+      console.log(`User Created Successfully with User Id ${savedUser.name} `);
+    }
+    callback(err, savedUser);
+
+  });
+  
+  
 }
 
 // getUsers
 exports.getUsers = function (callback) {
 
-  callback(null, [
-    {
-      id: 1,
-      name: 'John',
-      phone: '242424234',
-      email: 'a@b.com'
-    },
-    {
-      id: 2,
-      name: 'Steve',
-      phone: '2133',
-      email: 't@s.com'
+  User.find((err, userList) =>{
+    if(!err){
+      console.log('Users Fetched: ' + userList.length);
     }
-  ]);
+    callback(err, userList);
+  });
+  
 }
 
 // getUserById
 exports.getUserById = function (userId, callback) {
   console.log(userId);
 
-  callback(null, {
-    id: userId,
-    name: 'John',
-    phone: '2342234',
-    email: 'j@k.com'
+  User.findOne({userId: userId}, (err, userData) => {
+    if(!err){
+      console.log(userData);
+    }
+    callback(err, userData);
   });
 }
 
@@ -56,21 +51,22 @@ exports.updateUser = function (userId, userData, callback) {
   console.log(userId);
   console.log(userData);
 
-  callback(null,
-    {
-      msg: 'Updated Successfully!',
-      data: {
-        id: userId,
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone
-      }
-    });
+  User.updateOne({userId: userId}, userData, (err, result) => {
 
+    let _msg = 'Not Updated! Some Error Occured!';
+    if(!err){
+      if(result && result.n == 1){
+        console.log(result);
+        _msg =  'Updated Successfully!'
+      }
+    }
+
+    callback(err, { msg: _msg });
+  });
 }
 
 
-// deleteUser 
+//TODO: deleteUser 
 exports.deleteUser = function(userId, callback){
 
   console.log(userId);
